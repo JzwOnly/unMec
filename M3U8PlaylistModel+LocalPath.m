@@ -1,6 +1,6 @@
-#import "M3U8SegmentInfo+LocalPath.h"
+#import "M3U8PlaylistModel+LocalPath.h"
 
-@implementation M3U8SegmentInfo (LocalPath)
+@implementation M3U8PlaylistModel (LocalPath)
 - (void)savePlaylistsToPath:(NSString *)path keymap:(NSDictionary *)keymap error:(NSError **)error {
     if ([[NSFileManager defaultManager] fileExistsAtPath:path]) {
         if (NO == [[NSFileManager defaultManager] removeItemAtPath:path error:error]) {
