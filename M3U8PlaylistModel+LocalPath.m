@@ -6,6 +6,8 @@
 //  Copyright © 2021 jzw. All rights reserved.
 //
 
+#define PREFIX_MAIN_MEDIA_PLAYLIST @"main_media_"
+
 #import "M3U8PlaylistModel+LocalPath.h"
 
 @implementation M3U8PlaylistModel (LocalPath)
@@ -36,11 +38,11 @@
         }
 
         // main media playlist
-        [self saveMediaPlaylist:self.mainMediaPl toPath:path error:error];
-        [self saveMediaPlaylist:self.audioPl toPath:path error:error];
+        [self saveMediaPlaylist:self.mainMediaPl toPath:path keymap:keymap error:error];
+        [self saveMediaPlaylist:self.audioPl toPath:path keymap:keymap error:error];
 
     } else {
-        [self saveMediaPlaylist:self.mainMediaPl toPath:path error:error];
+        [self saveMediaPlaylist:self.mainMediaPl toPath:path keymap:keymap error:error];
     }
 }
 
@@ -59,9 +61,9 @@
         mainMediaPlContext = [mainMediaPlContext stringByReplacingOccurrencesOfString:sinfo.URI.absoluteString withString:names[i]];
     }
     // 替换所有key远程连接
-    for (int i=0; i < keymap.allKeys().count; i++) {
+    for (int i=0; i < keymap.allKeys.count; i++) {
         // key remote address
-        NSString * key = keymap.allKeys()[i];
+        NSString * key = keymap.allKeys[i];
         // key local address
         NSString * value = keymap[key];
         mainMediaPlContext = [mainMediaPlContext stringByReplacingOccurrencesOfString:key withString:value];
