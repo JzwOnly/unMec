@@ -1,3 +1,11 @@
+//
+//  M3U8PlaylistModel+_LocalPath.m
+//  Demo
+//
+//  Created by admin on 2021/4/20.
+//  Copyright © 2021 jzw. All rights reserved.
+//
+
 #import "M3U8PlaylistModel+LocalPath.h"
 
 @implementation M3U8PlaylistModel (LocalPath)
