@@ -1,2 +1,2 @@
 
-#import "M3U8SegmentInfo+LocalPath.h"
+#import "M3U8PlaylistModel+LocalPath.h"
