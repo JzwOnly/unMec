@@ -54,7 +54,7 @@
     }
 }
 
-- (void)saveMediaPlaylist:(M3U8MediaPlaylist *)playlist vid:(int)vid episodeNum:(int)episodeNum toPath:(NSString *)path rewrite:(BOOL)rewrite keymap:(NSDictionary *)keymap error:(NSError **)error {
+- (void)saveMediaPlaylist:(M3U8MediaPlaylist *)playlist toPath:(NSString *)path vid:(int)vid episodeNum:(int)episodeNum rewrite:(BOOL)rewrite keymap:(NSDictionary *)keymap error:(NSError **)error {
     if (nil == playlist) {
         return;
     }
