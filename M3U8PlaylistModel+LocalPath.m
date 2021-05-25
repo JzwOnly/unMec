@@ -11,7 +11,7 @@
 #import "M3U8PlaylistModel+LocalPath.h"
 
 @implementation M3U8PlaylistModel (LocalPath)
-- (void)savePlaylistsToPath:(NSString *)path rewrite:(BOOL)rewrite keymap:(NSDictionary *)keymap error:(NSError **)error {
+- (void)savePlaylistsToPath:(NSString *)path vid:(int)vid episodeNum:(int)episodeNum rewrite:(BOOL)rewrite keymap:(NSDictionary *)keymap error:(NSError **)error {
     // 判断文件夹是否存在
     if (NO == [[NSFileManager defaultManager] fileExistsAtPath:path]) {
         if (NO == [[NSFileManager defaultManager] createDirectoryAtPath:path withIntermediateDirectories:YES attributes:nil error:error]) {
@@ -24,7 +24,7 @@
         NSString *masterContext = self.masterPlaylist.m3u8PlainString;
         for (int i = 0; i < self.masterPlaylist.xStreamList.count; i ++) {
             M3U8ExtXStreamInf *xsinf = [self.masterPlaylist.xStreamList xStreamInfAtIndex:i];
-            NSString *name = [NSString stringWithFormat:@"../%@%d.m3u8", PREFIX_MAIN_MEDIA_PLAYLIST, i];
+            NSString *name = [NSString stringWithFormat:@"../%@%d_%d_%d.m3u8", PREFIX_MAIN_MEDIA_PLAYLIST, i, vid, episodeNum];
             masterContext = [masterContext stringByReplacingOccurrencesOfString:xsinf.URI.absoluteString withString:name];
         }
         NSString *mPath = [path stringByAppendingPathComponent:self.indexPlaylistName];
@@ -46,15 +46,15 @@
             }
         }
         // main media playlist
-        [self saveMediaPlaylist:self.mainMediaPl toPath:path rewrite:rewrite keymap:keymap error:error];
-        [self saveMediaPlaylist:self.audioPl toPath:path rewrite:rewrite keymap:keymap error:error];
+        [self saveMediaPlaylist:self.mainMediaPl toPath:path vid:vid episodeNum:episodeNum rewrite:rewrite keymap:keymap error:error];
+        [self saveMediaPlaylist:self.audioPl toPath:path vid:vid episodeNum:episodeNum rewrite:rewrite keymap:keymap error:error];
 
     } else {
-        [self saveMediaPlaylist:self.mainMediaPl toPath:path rewrite:rewrite keymap:keymap error:error];
+        [self saveMediaPlaylist:self.mainMediaPl toPath:path vid:vid episodeNum:episodeNum rewrite:rewrite keymap:keymap error:error];
     }
 }
 
-- (void)saveMediaPlaylist:(M3U8MediaPlaylist *)playlist toPath:(NSString *)path rewrite:(BOOL)rewrite keymap:(NSDictionary *)keymap error:(NSError **)error {
+- (void)saveMediaPlaylist:(M3U8MediaPlaylist *)playlist vid:(int)vid episodeNum:(int)episodeNum toPath:(NSString *)path rewrite:(BOOL)rewrite keymap:(NSDictionary *)keymap error:(NSError **)error {
     if (nil == playlist) {
         return;
     }
@@ -63,7 +63,7 @@
         return;
     }
     
-    NSArray *names = [self segmentNamesForPlaylist:playlist];
+    NSArray *names = [self segmentNamesForPlaylist:playlist vid:vid episodeNum:episodeNum];
     for (int i = 0; i < playlist.segmentList.count; i ++) {
         M3U8SegmentInfo *sinfo = [playlist.segmentList segmentInfoAtIndex:i];
         mainMediaPlContext = [mainMediaPlContext stringByReplacingOccurrencesOfString:sinfo.URI.absoluteString withString:names[i]];
@@ -96,5 +96,23 @@
             return;
         }
     }
+}
+
+- (NSArray *)segmentNamesForPlaylist:(M3U8MediaPlaylist *)playlist vid:(int)vid episodeNum:(int)episodeNum {
+    
+    NSString *prefix = [self prefixOfSegmentNameInPlaylist:playlist];
+    NSString *sufix = [self sufixOfSegmentNameInPlaylist:playlist];
+    NSMutableArray *names = [NSMutableArray array];
+    
+    NSArray *URLs = playlist.allSegmentURLs;
+    NSUInteger count = playlist.segmentList.count;
+    NSUInteger index = 0;
+    for (int i = 0; i < count; i ++) {
+        M3U8SegmentInfo *inf = [playlist.segmentList segmentInfoAtIndex:i];
+        index = [URLs indexOfObject:inf.mediaURL];
+        NSString *n = [NSString stringWithFormat:@"%d_%d_%@%lu.%@", vid, episodeNum, prefix, (unsigned long)index, sufix];
+        [names addObject:n];
+    }
+    return names;
 }
 @end
