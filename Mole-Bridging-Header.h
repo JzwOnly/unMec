@@ -9,3 +9,5 @@
 #import "QDTabBarViewController.h"
 #import "QDCommonViewController.h"
 #import "QDCommonTableViewController.h"
+#import "M3U8PlaylistModel+LocalPath.h"
+#import "BNHttpLocalServer.h"
