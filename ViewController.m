@@ -7,7 +7,8 @@
 
 #import "ViewController.h"
 #import <SDWebImage/SDWebImage.h>
-#define bmpUrl @"http://192.168.132.102:7001/162/001.bmp"
+//#define bmpUrl @"http://192.168.132.102:7001/162/001.bmp"
+#define bmpUrl @"https://raw.githubusercontent.com/JzwOnly/unMec/main/001.bmp"
 @interface ViewController ()
 @property(nonatomic, strong)UIImageView * onlineImgV;
 @property(nonatomic, strong)UIImageView * diskImgV;
@@ -19,10 +20,8 @@
 
 - (void)viewDidLoad {
     [super viewDidLoad];
-    
-    NSString * url = @"https://raw.githubusercontent.com/JzwOnly/unMec/main/001.bmp";
     self.onlineImgV = [[UIImageView alloc] init];
-    [self.onlineImgV sd_setImageWithURL:[NSURL URLWithString:url]];
+    [self.onlineImgV sd_setImageWithURL:[NSURL URLWithString:bmpUrl]];
     [self.view addSubview:self.onlineImgV];
     
     self.diskImgV = [[UIImageView alloc] init];
@@ -52,12 +51,13 @@
     self.loadFilePathBtn.frame = CGRectMake(CGRectGetMaxX(self.loadDiskBtn.frame)+20, 640, 120, 60);
 }
 - (void)handleLoadDiskWithSDCache:(UIButton *)sender{
-    NSString * url = @"https://raw.githubusercontent.com/JzwOnly/unMec/main/001.bmp";
     UIImage * image = nil;
-    NSString *key = [[SDWebImageManager sharedManager] cacheKeyForURL:[NSURL URLWithString:url]];
+    NSString *key = [[SDWebImageManager sharedManager] cacheKeyForURL:[NSURL URLWithString:bmpUrl]];
     BOOL exists = [[SDImageCache sharedImageCache] diskImageDataExistsWithKey:key];
     if (exists) {
-        image = [[SDImageCache sharedImageCache] imageFromMemoryCacheForKey:key];
+//        image = [[SDImageCache sharedImageCache] imageFromMemoryCacheForKey:key];
+//        image = [[SDImageCache sharedImageCache] imageFromCacheForKey:key];
+        image = [[SDImageCache sharedImageCache] imageFromDiskCacheForKey:key];
     }
     if (image) {
         self.diskImgV.image = image;
@@ -66,9 +66,8 @@
     }
 }
 - (void)handleLoadDiskWithFilePath:(UIButton *)sender {
-    NSString * url = @"https://raw.githubusercontent.com/JzwOnly/unMec/main/001.bmp";
     UIImage * image = nil;
-    NSString *key = [[SDWebImageManager sharedManager] cacheKeyForURL:[NSURL URLWithString:url]];
+    NSString *key = [[SDWebImageManager sharedManager] cacheKeyForURL:[NSURL URLWithString:bmpUrl]];
     BOOL exists = [[SDImageCache sharedImageCache] diskImageDataExistsWithKey:key];
     if (exists) {
         NSString * filePath = [[SDImageCache sharedImageCache] cachePathForKey:key];
