@@ -7,6 +7,7 @@
 //
 
 #import <Foundation/Foundation.h>
+#import <ReactiveObjC/ReactiveObjC.h>
 
 @interface JZViewModel : NSObject
 /// The `params` parameter in `-initWithParams:` method.
