@@ -7,7 +7,7 @@
 //
 
 #import <Foundation/Foundation.h>
-
+#import <UIKit/UIKit.h>
 #pragma mark - Colors
 
 #define UIColorGray1 UIColorMake(53, 60, 70)
