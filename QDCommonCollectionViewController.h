@@ -10,6 +10,8 @@
 @interface QDCommonCollectionViewController : QMUICommonViewController
 /// The `viewModel` parameter in `-initWithViewModel:` method.
 @property (nonatomic, readonly, strong) JZCollectionViewModel *viewModel;
+@property (nonatomic, strong) UICollectionView * collectionView;
+@property (nonatomic, strong) UICollectionViewFlowLayout * collectionLayout;
 
 /// Returns a new view.
 - (instancetype)initWithViewModel:(JZViewModel *)viewModel;
