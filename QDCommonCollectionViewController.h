@@ -1,5 +1,5 @@
 //
-//  QDCommonTableViewController.h
+//  QDCommonCollectionViewController.h
 //  qmuidemo
 //
 //  Created by QMUI Team on 15/4/13.
@@ -7,7 +7,7 @@
 //
 #import "JZCollectionViewModel.h"
 #import "QMUICommonViewController.h"
-@interface QDCommonTableViewController : QMUICommonViewController
+@interface QDCommonCollectionViewController : QMUICommonViewController
 /// The `viewModel` parameter in `-initWithViewModel:` method.
 @property (nonatomic, readonly, strong) JZCollectionViewModel *viewModel;
 
