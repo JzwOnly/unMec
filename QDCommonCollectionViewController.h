@@ -15,6 +15,6 @@
 - (instancetype)initWithViewModel:(JZViewModel *)viewModel;
 /// Binds the corresponding view model to the view.(绑定数据模型)
 - (void)bindViewModel;
-
+- (void)initCollectionView;
 - (void)showToastWithTips:(QMUITips *)tips info:(NSString *)info detailText:(NSString *)detailText;
 @end
