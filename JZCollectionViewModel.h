@@ -7,6 +7,7 @@
 
 #import "JZViewModel.h"
 #import "EmptyModel.h"
+#import <ReactiveObjC/ReactiveObjC.h>
 @interface JZCollectionViewModel : JZViewModel
 @property (nonatomic, readwrite , strong) EmptyModel * emptyModel;
 /// The data source of table view. 这里不能用NSMutableArray，因为NSMutableArray不支持KVO，不能被RACObserve
