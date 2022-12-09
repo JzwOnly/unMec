@@ -1098,7 +1098,7 @@ tableview点击外挂字幕回调
         }
         //初始化编码器，当有音频和视频参数时创建编码器
         if (self.recordEncoder == nil) {
-            self.recordEncoder = [[WCLRecordEncoder alloc] initWithPath:self.recordingURL.path];
+            self.recordEncoder = [[WCLRecordEncoder alloc] initPath:self.recordingURL.path];
             if (isVideo) {
                 [self.recordEncoder initVideoInputHeight:_cy width:_cx];
             } else {
