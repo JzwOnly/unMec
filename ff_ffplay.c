@@ -626,16 +626,16 @@ static int decoder_decode_frame(FFPlayer *ffp, Decoder *d, AVFrame *frame, AVSub
         } while (d->queue->serial != d->pkt_serial);
         //------------start
         // 获取开始录制前dts等于pts最后的值，用于
-         //if (!ffp->is_first && pkt.pts == pkt.dts) {
-         //      ffp->start_pts = pkt.pts;
-         //      ffp->start_dts = pkt.dts;
-         //  }
-         //if (ffp->is_record) { // 可以录制时，写入文件
-         //    if (0 != ffp_record_file(ffp, &pkt)) {
-         //        ffp->record_error = 1;
-         //        ffp_stop_record(ffp);
-         //    }
-         //}
+         if (!ffp->is_first && pkt.pts == pkt.dts) {
+              ffp->start_pts = pkt.pts;
+              ffp->start_dts = pkt.dts;
+          }
+         if (ffp->is_record) { // 可以录制时，写入文件
+            if (0 != ffp_record_file(ffp, &pkt)) {
+                ffp->record_error = 1;
+                ffp_stop_record(ffp);
+            }
+         }
          //-------------end
         if (pkt.data == flush_pkt.data) {
             avcodec_flush_buffers(d->avctx);
@@ -3496,23 +3496,23 @@ static int read_thread(void *arg)
     for (;;) {
          //-------------------
          // 获取开始录制前dts等于pts最后的值，用于
-         if (!ffp->is_first) {
-             if (pkt->stream_index == AVMEDIA_TYPE_AUDIO) {
-                 ffp->start_a_pts = pkt->pts;
-                 ffp->start_a_dts = pkt->dts;
-             }
-             if (pkt->stream_index == AVMEDIA_TYPE_VIDEO) {
-                 ffp->start_v_pts = pkt->pts;
-                 ffp->start_v_dts = pkt->dts;
-             }
-          }
-         // 可以录制时，写入文件
-         if (ffp->is_record) {
-             if (0 != ffp_record_file(ffp, pkt)) {
-                 ffp->record_error = 1;
-                 ffp_stop_record(ffp);
-             }
-         }
+//          if (!ffp->is_first) {
+//              if (pkt->stream_index == AVMEDIA_TYPE_AUDIO) {
+//                  ffp->start_a_pts = pkt->pts;
+//                  ffp->start_a_dts = pkt->dts;
+//              }
+//              if (pkt->stream_index == AVMEDIA_TYPE_VIDEO) {
+//                  ffp->start_v_pts = pkt->pts;
+//                  ffp->start_v_dts = pkt->dts;
+//              }
+//           }
+//          // 可以录制时，写入文件
+//          if (ffp->is_record) {
+//              if (0 != ffp_record_file(ffp, pkt)) {
+//                  ffp->record_error = 1;
+//                  ffp_stop_record(ffp);
+//              }
+//          }
         if (is->abort_request)
             break;
 #ifdef FFP_MERGE
