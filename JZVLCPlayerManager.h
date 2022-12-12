@@ -19,9 +19,10 @@
 @interface JZVLCPlayerManager : NSObject <ZFPlayerMediaPlayback>
 @property (nonatomic, strong, readonly) VLCMediaPlayer *player;
 
-//@property (nonatomic, strong, readonly) IJKFFOptions *options;
-
 @property (nonatomic, assign) NSTimeInterval timeRefreshInterval;
+
+@property (nonatomic, copy, nullable) void(^recordStarted)(void);
+@property (nonatomic, copy, nullable) void(^recordStoped)(NSString * path);
 
 @end
 #endif
