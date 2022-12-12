@@ -16,12 +16,32 @@
 #endif
 #if __has_include(<MobileVLCKit/MobileVLCKit.h>)
 
-@interface JZVLCPlayerManager()
+@interface JZVLCPlayerPresentView: UIView
+@property(nonatomic, strong)UIView * drawable;
+@end
+@implementation JZVLCPlayerPresentView
+- (instancetype)init
+{
+    self = [super init];
+    if (self) {
+        self.drawable = [[UIView alloc] init];
+        [self addSubview:self.drawable];
+    }
+    return self;
+}
+-(void)layoutSubviews {
+    [super layoutSubviews];
+    self.drawable.frame = self.bounds;
+}
+@end
+
+@interface JZVLCPlayerManager()<VLCMediaPlayerDelegate>
 @property (nonatomic, strong) VLCMediaPlayer *player;
 //@property (nonatomic, strong) IJKFFOptions *options;
 @property (nonatomic, assign) CGFloat lastVolume;
 @property (nonatomic, strong) NSTimer *timer;
 @property (nonatomic, assign) BOOL isReadyToPlay;
+@property (nonatomic, strong)JZVLCPlayerPresentView * presentView;
 @end
 @implementation JZVLCPlayerManager
 @synthesize view                           = _view;
@@ -124,9 +144,10 @@
 }
 
 - (void)seekToTime:(NSTimeInterval)time completionHandler:(void (^ __nullable)(BOOL finished))completionHandler {
-    if (self.player.remainingTime.intValue > 0 && self.player.isSeekable) {
-        float position = (time / (float)self.player.remainingTime.intValue);
+    if (self.player.media.length.intValue > 0 && self.player.isSeekable) {
+        float position = (time*1000 / (float)self.player.media.length.intValue);
         [self.player setPosition: position];
+        [self timerUpdate];
         if (completionHandler) completionHandler(YES);
     } else {
         self.seekTime = time;
@@ -137,27 +158,18 @@
 
 - (void)initializePlayer {
     self.player = [[VLCMediaPlayer alloc] init];
+    self.player.delegate = self;
     self.player.media = [VLCMedia mediaWithURL:self.assetURL];
-//    self.player = [[IJKFFMoviePlayerController alloc] initWithContentURL:self.assetURL withOptions:self.options];
-//    self.player.shouldAutoplay = self.shouldAutoPlay;
-//    [self.player prepareToPlay];
-    self.player.drawable = self.view.playerView;
-//    self.view.playerView = self.player.view;
+    
+    self.presentView = [[JZVLCPlayerPresentView alloc] init];
+    self.view.playerView = self.presentView;
+    self.player.drawable = self.presentView.drawable;
+
     self.scalingMode = self->_scalingMode;
-//    [self addPlayerNotificationObservers];
+    [self addPlayerNotificationObservers];
 }
 
 - (void)addPlayerNotificationObservers {
-    /// 准备播放
-//    [[NSNotificationCenter defaultCenter] addObserver:self
-//                                             selector:@selector(loadStateDidChange:)
-//                                                 name:VLCMediaPlayerStateChanged
-//                                               object:_player];
-//    /// 播放完成或者用户退出
-//    [[NSNotificationCenter defaultCenter] addObserver:self
-//                                             selector:@selector(moviePlayBackFinish:)
-//                                                 name:IJKMPMoviePlayerPlaybackDidFinishNotification
-//                                               object:_player];
     /// 准备开始播放了
     [[NSNotificationCenter defaultCenter] addObserver:self
                                              selector:@selector(movieTimeDidChange:)
@@ -168,30 +180,17 @@
                                              selector:@selector(moviePlayBackStateDidChange:)
                                                  name:VLCMediaPlayerStateChanged
                                                object:_player];
-//
-//    /// 视频的尺寸变化了
-//    [[NSNotificationCenter defaultCenter] addObserver:self
-//                                             selector:@selector(sizeAvailableChange:)
-//                                                 name:IJKMPMovieNaturalSizeAvailableNotification
-//                                               object:self.player];
 }
 //
 - (void)removeMovieNotificationObservers {
-//    [[NSNotificationCenter defaultCenter] removeObserver:self
-//                                                    name:VLCMediaPlayerStateChanged
-//                                                  object:_player];
-//    [[NSNotificationCenter defaultCenter] removeObserver:self
-//                                                    name:IJKMPMoviePlayerPlaybackDidFinishNotification
-//                                                  object:_player];
+
     [[NSNotificationCenter defaultCenter] removeObserver:self
                                                     name:VLCMediaPlayerTimeChanged
                                                   object:_player];
     [[NSNotificationCenter defaultCenter] removeObserver:self
                                                     name:VLCMediaPlayerStateChanged
                                                   object:_player];
-//    [[NSNotificationCenter defaultCenter] removeObserver:self
-//                                                    name:IJKMPMovieNaturalSizeAvailableNotification
-//                                                  object:_player];
+
 }
 
 - (void)timerUpdate {
@@ -199,8 +198,9 @@
         self.isReadyToPlay = YES;
         self.loadState = ZFPlayerLoadStatePlaythroughOK;
     }
-    self->_currentTime = self.player.time.intValue > 0 ? self.player.time.intValue : 0;
-    self->_totalTime = self.player.remainingTime.intValue;
+//    NSLog(@"当前时间%d", self.player.time.intValue);
+    self->_currentTime = self.player.time.intValue > 0 ? self.player.time.intValue/1000.0f : 0;
+    self->_totalTime = self.player.media.length.intValue/1000.0f;
     self->_bufferTime = 0;
     if (self.playerPlayTimeChanged) self.playerPlayTimeChanged(self, self.currentTime, self.totalTime);
     if (self.playerBufferTimeChanged) self.playerBufferTimeChanged(self, self.bufferTime);
@@ -235,6 +235,7 @@
 // 播放状态改变
 - (void)moviePlayBackStateDidChange:(NSNotification *)notification {
     NSLog(@"state: %@",VLCMediaPlayerStateToString(_player.state));
+    [self.view bringSubviewToFront:self.view.subviews.lastObject];
     switch (_player.state) {
         case VLCMediaPlayerStateStopped:
         {
@@ -267,6 +268,10 @@
             ZFPlayerLog(@"播放器的播放状态变了，现在是暂停状态 %d: paused", (int)_player.state);
         }
         break;
+        case VLCMediaPlayerStateBuffering:{
+            ZFPlayerLog(@"播放器的播放状态变了，现在是缓冲状态 %d: buffering", (int)_player.state);
+//            self.loadState = ZFPlayerLoadStateStalled;
+        }
         default:
         break;
     }
@@ -284,17 +289,6 @@
 - (float)rate {
     return _rate == 0 ?1:_rate;
 }
-
-//- (IJKFFOptions *)options {
-//    if (!_options) {
-//        _options = [IJKFFOptions optionsByDefault];
-//        /// 精准seek
-//        [_options setPlayerOptionIntValue:1 forKey:@"enable-accurate-seek"];
-//        /// 解决http播放不了
-//        [_options setOptionIntValue:1 forKey:@"dns_cache_clear" ofCategory:kIJKFFOptionCategoryFormat];
-//    }
-//    return _options;
-//}
 
 #pragma mark - setter
 
@@ -336,27 +330,32 @@
 - (void)setScalingMode:(ZFPlayerScalingMode)scalingMode {
     _scalingMode = scalingMode;
     self.view.scalingMode = scalingMode;
-//    switch (scalingMode) {
-//        case ZFPlayerScalingModeNone:
-//            self.player.scalingMode = IJKMPMovieScalingModeNone;
-//            break;
-//        case ZFPlayerScalingModeAspectFit:
-//            self.player.scalingMode = IJKMPMovieScalingModeAspectFit;
-//            break;
-//        case ZFPlayerScalingModeAspectFill:
-//            self.player.scalingMode = IJKMPMovieScalingModeAspectFill;
-//            break;
-//        case ZFPlayerScalingModeFill:
-//            self.player.scalingMode = IJKMPMovieScalingModeFill;
-//            break;
-//        default:
-//            break;
-//    }
 }
 
 - (void)setVolume:(float)volume {
     _volume = MIN(MAX(0, volume), 1);
     self.player.audio.volume = volume;
+}
+
+/**
+ * Sent by the default notification center whenever the player started recording.
+ * @param player the player who started recording
+ */
+- (void)mediaPlayerStartedRecording:(VLCMediaPlayer *)player {
+    if (self.recordStarted) {
+        self.recordStarted();
+    }
+}
+
+/**
+ * Sent by the default notification center whenever the player stopped recording.
+ * @param player the player who stopped recording
+ * @param path the path to the file that the player recorded to
+ */
+- (void)mediaPlayer:(VLCMediaPlayer *)player recordingStoppedAtPath:(NSString *)path {
+    if (self.recordStoped) {
+        self.recordStoped(path);
+    }
 }
 
 @end
