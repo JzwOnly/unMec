@@ -14,7 +14,6 @@
 #import "ZFPlayer.h"
 #import "ZFPlayerConst.h"
 #endif
-#if __has_include(<MobileVLCKit/MobileVLCKit.h>)
 
 @interface JZVLCPlayerPresentView: UIView
 @property(nonatomic, strong)UIView * drawable;
@@ -357,7 +356,9 @@
         self.recordStoped(path);
     }
 }
-
+- (void)mediaPlayerSnapshot:(NSNotification *)aNotification {
+    if (self.snapshotCallback) {
+        self.snapshotCallback(self.player.lastSnapshot);
+    }
+}
 @end
-
-#endif
